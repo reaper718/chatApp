@@ -12,7 +12,7 @@ const Messages = sequelize.define('Messages', {
         allowNull: false
     },
     to: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false
     }
 })
