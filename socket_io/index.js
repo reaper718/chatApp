@@ -1,6 +1,7 @@
 const { Server } = require('socket.io');
 const socketAuth  = require('./middelware');
 const personelChatRoom = require('./handlers/personelChatRoom');
+const groupChatRoom = require("./handlers/groupChatRoom");
 
 module.exports = (server) => {
     const io = new Server(server, {
@@ -16,13 +17,14 @@ module.exports = (server) => {
 
     console.log("User connected:", socket.userId);
     
-    personelChatRoom(socket,io);
+    personelChatRoom(io,socket);
+    groupChatRoom(io,socket);
 
     socket.on("disconnect", () => {
         console.log("User disconnected:", socket.userId);
     });
-
-    return io;  
 });
+
+return io;
 }
 

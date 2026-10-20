@@ -76,7 +76,9 @@ const getUser = async (req,res) => {
 
 const getAllUsers = async (req,res) => {
     try {
-        const users = await Users.findAll();
+        const users = await Users.findAll({
+            attributes: ['id','name','email','phone']
+        });
 
         return res.status(200).json(users);
     } catch (error) {

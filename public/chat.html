@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat App</title>
+    <title>ChatFlow</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -18,29 +17,26 @@
             </div>
 
             <div class="search-box">
-                <input type="text" placeholder="Search contacts...">
-            </div>
-
-            <div class="chat-search">
                 <input
-                    type="email"
-                    id="recipientEmail"
-                    placeholder="Enter user's email"
-                    required
+                    type="text"
+                    placeholder="Search contacts..."
+                    id="searchContacts"
                 >
-                <button id="joinChatBtn" type="button">Start Chat</button>
             </div>
 
-            <p id="chatStatus"></p>
-
-            <!-- <div class="contact active">
-                <div class="avatar">A</div>
-                <div class="contact-info">
-                    <h3>Alex Morgan</h3>
-                    <p>Hey! How are you?</p>
+            
+            <div class="sidebar-section">
+                <div class="section-heading">
+                    <h3>Groups</h3>
+                    <button id="createGroupBtn" type="button">+ Create</button>
                 </div>
-                <span class="contact-time">10:30 AM</span>
-            </div> -->
+                <div id="groupsList" class="groups-list"></div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Personal Chats</h3>
+                <div id="contactsList" class="contacts-list"></div>
+            </div>
 
         </aside>
 
@@ -48,10 +44,13 @@
         <main class="chat-window">
 
             <header class="chat-header">
-                <div class="avatar">A</div>
+                <div class="avatar" id="chatAvatar">?</div>
+
                 <div>
-                    <h3>Alex Morgan</h3>
-                    <p class="online">Online</p>
+                    <h3 id="chatName">Select a contact</h3>
+                    <p class="online" id="chatStatus">
+                        Choose someone to start chatting
+                    </p>
                 </div>
             </header>
 
@@ -59,20 +58,6 @@
                 <div class="date-divider">
                     <span>Today</span>
                 </div>
-
-                <!-- <div class="message received">
-                    <div class="bubble">
-                        Hey! How are you?
-                        <span class="timestamp">10:28 AM</span>
-                    </div>
-                </div>
-
-                <div class="message sent">
-                    <div class="bubble">
-                        I'm good! How about you?
-                        <span class="timestamp">10:29 AM</span>
-                    </div>
-                </div> -->
             </section>
 
             <form class="message-form" id="messageForm">
@@ -82,14 +67,46 @@
                     placeholder="Type a message..."
                     autocomplete="off"
                     required
+                    disabled
                 >
-                <button type="submit">Send ➤</button>
+
+                <button type="submit" disabled>Send ➤</button>
             </form>
 
         </main>
     </div>
 
-    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    
+    <div id="createGroupModal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Create New Group</h2>
+
+            <form id="createGroupForm">
+                <label for="groupName">Group Name</label>
+                <input
+                    type="text"
+                    id="groupName"
+                    placeholder="Enter group name"
+                    required
+                >
+
+                <h3>Select Members</h3>
+                <div id="groupMembersList"></div>
+
+                <div class="modal-actions">
+                    <button type="button" id="cancelGroupBtn">
+                        Cancel
+                    </button>
+                    <button type="submit" id="saveGroupBtn">
+                        Create Group
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
     <script src="script.js"></script>
 </body>
