@@ -127,6 +127,7 @@ function initialize() {
         recievedMessage.classList.add("message");
         recievedMessage.classList.add("received")
         const bubble = document.createElement("div");
+        bubble.classList.add("bubble");
         bubble.textContent = message.message;
         const timerStamp = document.createElement("span");
         timerStamp.classList.add("timestamp");
