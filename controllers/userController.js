@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const addUser = async (req,res) => {
     try {
-        const {name, email, password} = req.body;
+        const {name, email, phone,password} = req.body;
 
         const user = await Users.findOne({
             where: {
@@ -23,6 +23,7 @@ const addUser = async (req,res) => {
         await Users.create({
             name: name,
             email: email,
+            phone: phone,
             password: hashedPasswd
         })
 
