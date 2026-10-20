@@ -4,6 +4,7 @@ const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
+const path = require('path');
 
 const User = require('./models/Users');
 const forgotPassword = require('./models/ForgotPasswordRequests');
@@ -12,7 +13,6 @@ const Messages = require('./models/messages');
 const userRouter = require('./routers/userRouter');
 const forgotPassedRouter = require('./routers/forgotPasswdRouter');
 const messageRouter = require('./routers/messageRouter');
-const { log } = require('console');
 
 const app = express();
 const server = http.createServer(app);
@@ -23,6 +23,11 @@ const io = new Server(server, {
     }
 });
 
+app.get("/", (req,res) => {
+    res.sendFile(path.join(__dirname, "./public/login.html"))
+})
+
+app.use(express.static(path.join(__dirname, "./public")));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json())
 app.use(cors());
@@ -72,10 +77,12 @@ io.on("connection", (socket) => {
     });
 });
 
-db.sync().then(() => {
-    app.listen(3000,() => {
-    console.log("server is running ")
-})
-}).catch((err) => {
-    console.log(err);
-})
+db.sync()
+    .then(() => {
+        server.listen(3000, () => {
+            console.log("Server is running on port 3000");
+        });
+    })
+    .catch((err) => {
+        console.log(err);
+    });

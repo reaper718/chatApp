@@ -1,3 +1,5 @@
+let selectedUserId = null;
+
 const messageForm = document.getElementById("messageForm");
 const messageInput = document.getElementById("messageInput");
 const messages = document.getElementById("messages");
@@ -47,7 +49,11 @@ messageForm.addEventListener("submit", async (event) => {
     try {
         const response = await axios.post(
             `${API_URL}/messages/send`,
-            { message: text },
+            { 
+                message: text,
+                to: selectedUserId 
+
+            },
             {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -80,6 +86,24 @@ messageForm.addEventListener("submit", async (event) => {
 function initialize() {
     const token = sessionStorage.getItem("token");
 
+    const socket = io("http://localhost:3000", {
+        auth: {
+            token: token
+        }
+    });
+
+    socket.on("connect", () => {
+        console.log("Connected to Socket.IO:", socket.id);
+    });
+
+    socket.on("connect_error", (error) => {
+        console.error("Socket connection failed:", error.message);
+    });
+
+    socket.on("disconnect", () => {
+        console.log("Disconnected from Socket.IO");
+    });
+
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
     axios.get(`${API_URL}/users/getAllUsers`)
@@ -90,12 +114,9 @@ function initialize() {
             console.log(err);
         });
 
-    axios.get(`${API_URL}/messages/getAllMessages`)
-        .then((res) => {
-            // displayMessages(res.data);
-            console.log(res.data);
-        })
-        .catch(err => console.log(err));
+    socket.on("receiveMessage", (message) => {
+        console.log("New message received:", message);
+    });
 }
 
 document.addEventListener("DOMContentLoaded", initialize);
@@ -129,6 +150,18 @@ function display(users) {
         // Append elements to contact
         contact.appendChild(avatar);
         contact.appendChild(contactInfo);
+
+        contact.addEventListener("click", () => {
+        document.querySelectorAll(".contact").forEach(contact => {
+            contact.classList.remove("active");
+        });
+
+        contact.classList.add("active");
+
+        selectedUserId = user.id;
+
+        console.log("Selected recipient:", selectedUserId);
+});
 
         // Add contact to sidebar
         sidebar.appendChild(contact);
