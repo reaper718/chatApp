@@ -1,6 +1,7 @@
 const Users = require('../models/Users');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { SequelizeScopeError } = require('sequelize');
 
 const addUser = async (req,res) => {
     try {
@@ -73,7 +74,23 @@ const getUser = async (req,res) => {
     }
 }
 
+const getAllUsers = async (req,res) => {
+    try {
+        const users = await Users.findAll();
+
+        return res.status(200).json(users);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: "unable to get all users",
+            error: error
+        })
+    }
+}
+
 module.exports = {
     addUser,
-    getUser
+    getUser,
+    getAllUsers
 }
