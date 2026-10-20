@@ -2,9 +2,8 @@ const express = require('express');
 const db = require('./utils/db-connection');
 const cors = require('cors');
 const http = require('http');
-const { Server } = require('socket.io');
-const jwt = require('jsonwebtoken');
 const path = require('path');
+const socketIO = require('./socket_io');
 
 const User = require('./models/Users');
 const forgotPassword = require('./models/ForgotPasswordRequests');
@@ -17,11 +16,7 @@ const messageRouter = require('./routers/messageRouter');
 const app = express();
 const server = http.createServer(app);
 
-const io = new Server(server, {
-    cors: {
-        origin: "http://localhost:3000"
-    }
-});
+socketIO(server);
 
 app.get("/", (req,res) => {
     res.sendFile(path.join(__dirname, "./public/login.html"))
@@ -43,39 +38,6 @@ forgotPassword.belongsTo(User);
 
 User.hasMany(Messages);
 Messages.belongsTo(User);
-
-io.use((socket, next) => {
-    try {
-        const token = socket.handshake.auth.token;
-
-        if (!token) {
-            return next(new Error("Authentication required"));
-        }
-
-        const decoded = jwt.verify(token, 'secretKey');
-
-        // Match this property to the ID field in your JWT payload.
-        socket.userId = decoded.id;
-
-        if (!socket.userId) {
-            return next(new Error("Invalid user token"));
-        }
-
-        next();
-    } catch (error) {
-        next(new Error("Invalid authentication token"));
-    }
-});
-
-io.on("connection", (socket) => {
-    socket.join(`user:${socket.userId}`);
-
-    console.log("User connected:", socket.userId);
-
-    socket.on("disconnect", () => {
-        console.log("User disconnected:", socket.userId);
-    });
-});
 
 db.sync()
     .then(() => {

@@ -1,5 +1,12 @@
 let selectedUserId = null;
 
+function getCurrentTime() {
+    return new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
 const messageForm = document.getElementById("messageForm");
 const messageInput = document.getElementById("messageInput");
 const messages = document.getElementById("messages");
@@ -115,6 +122,19 @@ function initialize() {
         });
 
     socket.on("receiveMessage", (message) => {
+        const messages = document.querySelector(".messages");
+        const recievedMessage = document.createElement("div");
+        recievedMessage.classList.add("message");
+        recievedMessage.classList.add("received")
+        const bubble = document.createElement("div");
+        bubble.textContent = message.message;
+        const timerStamp = document.createElement("span");
+        timerStamp.classList.add("timestamp");
+        bubble.appendChild(timerStamp);
+        recievedMessage.appendChild(bubble);
+
+        messages.appendChild(recievedMessage);
+
         console.log("New message received:", message);
     });
 }
