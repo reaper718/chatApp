@@ -21,6 +21,18 @@
                 <input type="text" placeholder="Search contacts...">
             </div>
 
+            <div class="chat-search">
+                <input
+                    type="email"
+                    id="recipientEmail"
+                    placeholder="Enter user's email"
+                    required
+                >
+                <button id="joinChatBtn" type="button">Start Chat</button>
+            </div>
+
+            <p id="chatStatus"></p>
+
             <!-- <div class="contact active">
                 <div class="avatar">A</div>
                 <div class="contact-info">
@@ -48,7 +60,7 @@
                     <span>Today</span>
                 </div>
 
-                <div class="message received">
+                <!-- <div class="message received">
                     <div class="bubble">
                         Hey! How are you?
                         <span class="timestamp">10:28 AM</span>
@@ -60,14 +72,7 @@
                         I'm good! How about you?
                         <span class="timestamp">10:29 AM</span>
                     </div>
-                </div>
-
-                <div class="message received">
-                    <div class="bubble">
-                        Doing great! Want to work on our project?
-                        <span class="timestamp">10:30 AM</span>
-                    </div>
-                </div>
+                </div> -->
             </section>
 
             <form class="message-form" id="messageForm">

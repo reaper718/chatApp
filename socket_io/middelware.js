@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-module.exports = () => {
+module.exports = (io) => {
     io.use((socket, next) => {
     try {
         const token = socket.handshake.auth.token;

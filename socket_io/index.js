@@ -21,6 +21,8 @@ module.exports = (server) => {
     socket.on("disconnect", () => {
         console.log("User disconnected:", socket.userId);
     });
+
+    return io;  
 });
 }
 

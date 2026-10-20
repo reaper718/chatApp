@@ -16,7 +16,7 @@ const messageRouter = require('./routers/messageRouter');
 const app = express();
 const server = http.createServer(app);
 
-socketIO(server);
+const io = socketIO(server);
 
 app.get("/", (req,res) => {
     res.sendFile(path.join(__dirname, "./public/login.html"))
