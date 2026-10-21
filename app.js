@@ -7,12 +7,16 @@ const http = require('http');
 const path = require('path');
 const socketIO = require('./socket_io');
 
+const archiveJob = require("./jobs/archiveCron");
+
 const User = require('./models/Users');
 const forgotPassword = require('./models/ForgotPasswordRequests');
 const Messages = require('./models/messages');
 const Groups = require("./models/Groups");
 const GroupMembers = require("./models/GroupMembers");
 const GroupMessages = require("./models/GroupMessages");
+const ArchivedMessages = require("./models/ArchivedMessages");
+const ArchivedGroupMessages = require("./models/ArchivedGroupMessages");
 
 const userRouter = require('./routers/userRouter');
 const forgotPassedRouter = require('./routers/forgotPasswdRouter');
@@ -106,7 +110,7 @@ GroupMessages.belongsTo(User, {
     foreignKey: "UserId"
 });
 
-db.sync()
+await db.sync()
     .then(() => {
         server.listen(3000, () => {
             console.log("Server is running on port 3000");
@@ -115,3 +119,6 @@ db.sync()
     .catch((err) => {
         console.log(err);
     });
+
+
+archiveJob.start();
