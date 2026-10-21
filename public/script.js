@@ -44,9 +44,11 @@ const createGroupForm = document.getElementById("createGroupForm");
 const groupNameInput = document.getElementById("groupName");
 const groupMembersList = document.getElementById("groupMembersList");
 const cancelGroupBtn = document.getElementById("cancelGroupBtn");
+const mediaInput = document.getElementById("mediaInput");
 
 
-function addMessage(text, time, isSent = true, senderName = "") {
+
+async function addMessage(text, time,isSent = true, senderName = "", media = null) {
     const messageDiv = document.createElement("div");
 
     messageDiv.classList.add(
@@ -54,7 +56,6 @@ function addMessage(text, time, isSent = true, senderName = "") {
         isSent ? "sent" : "received"
     );
 
-    // Show the sender's name for received group messages.
     if (!isSent && currentChatType === "group" && senderName) {
         const sender = document.createElement("div");
         sender.className = "message-sender";
@@ -62,9 +63,68 @@ function addMessage(text, time, isSent = true, senderName = "") {
         messageDiv.appendChild(sender);
     }
 
-    const messageText = document.createElement("div");
-    messageText.className = "message-text";
-    messageText.textContent = text;
+    if (text) {
+        const textElement = document.createElement("div");
+        textElement.className = "message-text";
+        textElement.textContent = text;
+        messageDiv.appendChild(textElement);
+    }
+
+    if (media?.mediaKey) {
+        const attachment = document.createElement("div");
+        attachment.className = "message-attachment";
+        attachment.textContent = "Loading attachment...";
+
+        messageDiv.appendChild(attachment);
+
+        try {
+            const response = await axios.get(
+                `${API_URL}/media/url`,
+                {
+                    params: { key: media.mediaKey },
+                    headers: {
+                        Authorization:
+                            `Bearer ${sessionStorage.getItem("token")}`
+                    }
+                }
+            );
+
+            const url = response.data.data.url;
+            const type = media.mediaType || "";
+
+            attachment.replaceChildren();
+
+            if (type.startsWith("image/")) {
+                const image = document.createElement("img");
+                image.src = url;
+                image.alt = media.mediaName || "Shared image";
+                image.className = "shared-image";
+                image.loading = "lazy";
+                attachment.appendChild(image);
+            } else if (type.startsWith("video/")) {
+                const video = document.createElement("video");
+                video.src = url;
+                video.controls = true;
+                video.preload = "metadata";
+                video.className = "shared-video";
+                attachment.appendChild(video);
+            } else {
+                const link = document.createElement("a");
+                link.href = url;
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+                link.textContent =
+                    `📎 ${media.mediaName || "Download attachment"}`;
+                attachment.appendChild(link);
+            }
+        } catch (error) {
+            console.error(
+                "Unable to load attachment:",
+                error.response?.data || error
+            );
+            attachment.textContent = "Attachment unavailable";
+        }
+    }
 
     const timeElement = document.createElement("div");
     timeElement.className = "message-time";
@@ -73,15 +133,14 @@ function addMessage(text, time, isSent = true, senderName = "") {
 
     timeElement.textContent = date.toLocaleTimeString([], {
         hour: "2-digit",
-        minute: "2-digit",
-        hour12: true
+        minute: "2-digit"
     });
 
-    messageDiv.append(messageText, timeElement);
+    messageDiv.appendChild(timeElement);
     messages.appendChild(messageDiv);
-
     messages.scrollTop = messages.scrollHeight;
 }
+
 
 
 messageForm.addEventListener("submit", async (event) => {
@@ -171,7 +230,7 @@ function initialize() {
 
         const isSent = senderId !== selectedId;
 
-        addMessage(data.message, data.createdAt, isSent);
+        addMessage(data.message, data.createdAt, isSent, data.senderName || "", data.mediaKey ? data : null);
     });
 
     
@@ -194,7 +253,8 @@ function initialize() {
                 data.message,
                 data.createdAt,
                 isSent,
-                data.senderName
+                data.senderName,
+                data.mediaKey ? data : null
             );
         }
     });
@@ -523,3 +583,65 @@ function getPrivateRoomId(userId1, userId2) {
     const ids = [Number(userId1), Number(userId2)].sort((a, b) => a - b);
     return `private:${ids[0]}:${ids[1]}`;
 }
+
+mediaInput.addEventListener("change", async () => {
+    const file = mediaInput.files[0];
+    if (!file) return;
+
+    if (file.size > 25 * 1024 * 1024) {
+        alert("Maximum file size is 25 MB.");
+        mediaInput.value = "";
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+        const response = await axios.post(
+            `${API_URL}/media/upload`,
+            formData,
+            {
+                headers: {
+                    Authorization: `Bearer ${sessionStorage.getItem("token")}`
+                }
+            }
+        );
+
+        // console.log("Media uploaded:", response.data);
+        // alert(`Uploaded ${response.data.data.originalName} successfully!`);
+
+        const uploaded = response.data.data;
+
+        const payload = {
+            key: uploaded.key,
+            caption: prompt("Add a caption:") || ""
+        };
+
+        if (currentChatType === "group" && currentGroup) {
+            payload.groupId = currentGroup.id;
+        } else if (currentChatType === "personal" && currentChatUser) {
+            payload.recipientId = currentChatUser.id;
+        } else {
+            alert("Open a personal chat or group before sharing media.");
+            return;
+        }
+
+        const messageResponse = await axios.post(
+            `${API_URL}/media-messages/send`,
+            payload,
+            {
+                headers: {
+                    Authorization: `Bearer ${sessionStorage.getItem("token")}`
+                }
+            }
+        );
+
+        console.log("Media message saved:", messageResponse.data);
+    } catch (error) {
+        console.error("Media upload error:", error.response?.data || error);
+        alert(error.response?.data?.message || "Upload failed.");
+    } finally {
+        mediaInput.value = "";
+    }
+});

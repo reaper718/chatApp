@@ -8,12 +8,28 @@ const Messages = sequelize.define('Messages', {
         autoIncrement: true
     },
     message: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
     },
     to: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    mediaKey: {
+        type: DataTypes.STRING(1024),
+        allowNull: true
+    },
+    mediaName: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    mediaType: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    mediaSize: {
+        type: DataTypes.BIGINT,
+        allowNull: true
     }
 })
 

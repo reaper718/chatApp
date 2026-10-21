@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require('express');
 const db = require('./utils/db-connection');
 const cors = require('cors');
@@ -17,6 +19,8 @@ const forgotPassedRouter = require('./routers/forgotPasswdRouter');
 const messageRouter = require('./routers/messageRouter');
 const groupRouter = require('./routers/groupRouter');
 const groupMessageRouter = require('./routers/groupMessageRouter');
+const mediaRouter = require("./routers/mediaRouter");
+const mediaMessageRouter = require("./routers/mediaMessageRouter");
 
 const app = express();
 const server = http.createServer(app);
@@ -39,6 +43,8 @@ app.use('/password',forgotPassedRouter);
 app.use('/messages', messageRouter);
 app.use('/groups',groupRouter);
 app.use('/group-Messages', groupMessageRouter);
+app.use('/media',mediaRouter);
+app.use("/media-messages", mediaMessageRouter);
 
 User.hasMany(forgotPassword);
 forgotPassword.belongsTo(User);
